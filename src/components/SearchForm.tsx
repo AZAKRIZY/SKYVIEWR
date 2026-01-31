@@ -2,11 +2,13 @@ import { useState, useRef } from 'react';
 import { useFlightStore } from '../stores/flightStores';
 import { searchFlights, searchAirport } from '../Api/FlightApi';
 import type{ GoogleFlightAirport } from '../flight.types';
-
+interface props{
+  onSearchComplete:()=>void
+}
 // Simple cache to avoid duplicate API calls
 const cache: Record<string, GoogleFlightAirport[]> = {};
 
-export const SearchForm = () => {
+export const SearchForm = (props:props) => {
   const {
     departureDate,
     passengers,
@@ -15,6 +17,7 @@ export const SearchForm = () => {
     setFlights,
     setLoading,
     setError,
+    setPriceGraphData
   } = useFlightStore();
 
   const [origin, setOrigin] = useState<GoogleFlightAirport | null>(null);
@@ -118,56 +121,69 @@ export const SearchForm = () => {
   };
 
   // Handle form submission
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSearch = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  if (!origin || !destination || !departureDate) {
+    setError('Please fill in all required fields');
+    return;
+  }
+
+  setLoading(true);
+  setError(null);
+
+  try {
+    // Just fetch flights - priceHistory is included
+    const flightsResponse = await searchFlights({
+      departure_id: origin.id,
+      arrival_id: destination.id,
+      outbound_date: departureDate,
+      adults: passengers,
+      travel_class: 'ECONOMY',
+      currency: 'USD',
+      language_code: 'en-US',
+      country_code: 'US',
+    });
+
+    console.log('✅ Flight Search Response:', flightsResponse);
     
-    if (!origin || !destination || !departureDate) {
-      setError('Please fill in all required fields');
-      return;
+    const flights = flightsResponse.data?.itineraries?.topFlights || [];
+    const priceHistory = flightsResponse.data?.priceHistory?.history || [];
+    
+    console.log('📊 Price History:', priceHistory);
+    
+    setFlights(flights);
+    
+    // Transform price history to match our graph format
+    if (priceHistory.length > 0) {
+      const formattedPriceData = priceHistory.map((item: any) => ({
+        departure: item.date,
+        price: item.price
+      }));
+      setPriceGraphData(formattedPriceData);
     }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await searchFlights({
-        departure_id: origin.id,
-        arrival_id: destination.id,
-        outbound_date: departureDate,
-        adults: passengers,
-        travel_class: 'ECONOMY',
-        currency: 'USD',
-        language_code: 'en-US',
-        country_code: 'US',
-      });
-
-      console.log('✅ Flight Search Response:', response);
-      
-      // Extract flights from response
-      const flights = response.data?.itineraries?.topFlights || [];
-      setFlights(flights);
-      
-      if (flights.length === 0) {
-        setError('No flights found for this route');
-      }
-    } catch (error: any) {
-      console.error('❌ Flight search error:', error);
-      setError('Failed to search flights. Please try again.');
-    } finally {
-      setLoading(false);
+    
+    if (flights.length === 0) {
+      setError('No flights found for this route');
     }
-  };
+  } catch (error: any) {
+    console.error('❌ Search error:', error);
+    setError('Failed to search flights. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-4 md:p-6 mb-6">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">
+    <div className="bg-white md:w-3/4 shadow-lg rounded-lg p-4 md:p-6 mx-auto">
+      <h1 className="text-2xl md:text-2xl font-bold mb-6 text-main-900 font-Rubik">
         Search Flights
       </h1>
       
-      <form onSubmit={handleSearch} className="space-y-4">
+      <form onSubmit={handleSearch} className="space-y-4 font-DMSans" >
         {/* Origin Input */}
         <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-main-900 mb-2">
             From
           </label>
           <div className="relative">
@@ -180,7 +196,7 @@ export const SearchForm = () => {
             />
             {searchingOrigin && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                <div className="animate-spin h-5 w-5 border-2 border-main-700 border-t-transparent rounded-full"></div>
               </div>
             )}
           </div>
@@ -208,7 +224,7 @@ export const SearchForm = () => {
 
         {/* Destination Input */}
         <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-main-900 mb-2">
             To
           </label>
           <div className="relative">
@@ -250,7 +266,7 @@ export const SearchForm = () => {
         {/* Date and Passengers */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-main-900 mb-2">
               Departure Date
             </label>
             <input
@@ -263,7 +279,7 @@ export const SearchForm = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-main-900 mb-2">
               Passengers
             </label>
             <input
@@ -280,7 +296,8 @@ export const SearchForm = () => {
         {/* Search Button */}
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={props.onSearchComplete}
+          className="w-full bg-main-900 hover:bg-main-700 cursor-pointer text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Search Flights
         </button>
@@ -288,3 +305,5 @@ export const SearchForm = () => {
     </div>
   );
 };
+
+

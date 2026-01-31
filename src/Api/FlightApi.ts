@@ -55,11 +55,22 @@ export const searchAirport = async (query: string): Promise<AirportSearchRespons
 };
 
 // Get price graph
+// Get price graph
 export const getPriceGraph = async (params: PriceGraphParams): Promise<PriceGraphResponse> => {
   try {
     const response = await apiClient.get('/getPriceGraph', {
       params: {
-        ...params,
+        departure_id: params.departure_id,
+        arrival_id: params.arrival_id,
+        outbound_date: params.outbound_date, // This was missing!
+        return_date: params.return_date,
+        start_date: params.start_date,
+        end_date: params.end_date,
+        adults: params.adults,
+        children: params.children,
+        infant_in_seat: params.infant_in_seat,
+        infant_on_lap: params.infant_on_lap,
+        travel_class: params.travel_class,
         currency: params.currency || 'USD',
         country_code: params.country_code || 'US'
       }

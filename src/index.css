@@ -1,6 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Rubik:ital,wght@0,300..900;1,300..900&family=Special+Gothic+Expanded+One&display=swap');
 @import "tailwindcss";
-@theme{
 
+@theme{
+    --font-Rubik: 'Rubik', sans-serif;
+    --font-Gothic: 'Special Gothic Expanded One', sans-serif;
+    --font-DMSans: 'DM Sans', sans-serif;
     --color-main-900:#0F2854;
     --color-main-700:#1C4D8D;
     --color-main-500:#4988C4;

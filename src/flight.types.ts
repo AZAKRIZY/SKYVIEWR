@@ -54,6 +54,7 @@ export interface FlightSearchResponse {
 export interface PriceGraphPoint {
   departure: string; // "2025-04-01"
   price: number;
+  date: string;
 }
 
 export interface PriceGraphResponse {

@@ -22,12 +22,12 @@ export const FlightCard = ({ flight }: FlightCardProps) => {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow">
+    <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg  mx-auto transition-shadow">
       {/* Flight times and route */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex-1">
           <div className="text-2xl font-bold text-gray-900">{departureTime}</div>
-          <div className="text-sm text-gray-500">Departure</div>
+          <div className="text-sm text-main-900">Departure</div>
         </div>
 
         <div className="flex-1 px-4">
@@ -35,7 +35,7 @@ export const FlightCard = ({ flight }: FlightCardProps) => {
             {/* Timeline */}
             <div className="flex items-center justify-center">
               <div className="h-px bg-gray-300 flex-1"></div>
-              <div className="px-2 text-xs text-gray-500">{flight.duration.text}</div>
+              <div className="px-2 text-xs text-main-900">{flight.duration.text}</div>
               <div className="h-px bg-gray-300 flex-1"></div>
             </div>
             {/* Stops indicator */}
@@ -53,7 +53,7 @@ export const FlightCard = ({ flight }: FlightCardProps) => {
 
         <div className="flex-1 text-right">
           <div className="text-2xl font-bold text-gray-900">{arrivalTime}</div>
-          <div className="text-sm text-gray-500">Arrival</div>
+          <div className="text-sm text-main-900">Arrival</div>
         </div>
       </div>
 
@@ -72,7 +72,7 @@ export const FlightCard = ({ flight }: FlightCardProps) => {
           <div className="text-2xl font-bold text-blue-600">
             ${flight.price}
           </div>
-          <div className="text-xs text-gray-500">per person</div>
+          <div className="text-xs text-main-900">per person</div>
         </div>
       </div>
     </div>

@@ -174,6 +174,7 @@ const handleSearch = async (e: React.FormEvent) => {
   }
 };
 
+
   return (
     <div className="bg-white md:w-3/4 shadow-lg rounded-lg p-4 md:p-6 mx-auto">
       <h1 className="text-2xl md:text-2xl font-bold mb-6 text-main-900 font-Rubik">

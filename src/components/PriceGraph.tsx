@@ -14,7 +14,7 @@ export const PriceGraph = () => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-lg md:w-[90%] mx-auto shadow p-6">
         <div className="animate-pulse">
           <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
           <div className="h-64 bg-gray-200 rounded"></div>
@@ -44,7 +44,7 @@ const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
 const avgPrice = prices.length > 0 ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0;
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 md:p-6 mb-6">
+    <div className="bg-white rounded-lg md:w-[90%] mt-5 mx-auto shadow p-4 md:p-6 mb-6">
       <div className="mb-4">
         <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
           Price Trend
@@ -65,9 +65,9 @@ const avgPrice = prices.length > 0 ? Math.round(prices.reduce((a, b) => a + b, 0
         </div>
       </div>
 
-      <div className="w-full" style={{ height: "320px" }}>
+      <div className="w-[75%] " style={{ height: "300px" }}>
         {/* Use inline style for height */}
-        <ResponsiveContainer width="100%" height={320}>
+        <ResponsiveContainer width="75%" height={320}>
           <LineChart
             data={chartData}
             margin={{ top: 5, right: 20, left: 0, bottom: 5 }}

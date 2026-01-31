@@ -7,7 +7,7 @@ export const FlightList = forwardRef<HTMLDivElement, {}>((_, ref) => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-8 text-center">
+      <div className="bg-white rounded-lg md:w-[90%] mx-auto shadow p-8 text-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-main-700 mb-4"></div>
         <p className="text-main-900">Searching for the best flights...</p>
       </div>

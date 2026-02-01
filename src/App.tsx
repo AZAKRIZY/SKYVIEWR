@@ -20,8 +20,11 @@ function App() {
       </h1>
 
       <SearchForm onSearchComplete={onSearchComplete} />
-      <FlightList ref={sectionRef} />
+      <div ref={sectionRef}>
+      <FlightList  />
       <PriceGraph/>
+      </div>
+      
     </div>
   );
 }

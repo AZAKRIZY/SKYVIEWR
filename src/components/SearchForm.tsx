@@ -1,14 +1,14 @@
-import { useState, useRef } from 'react';
-import { useFlightStore } from '../stores/flightStores';
-import { searchFlights, searchAirport } from '../Api/FlightApi';
-import type{ GoogleFlightAirport } from '../flight.types';
-interface props{
-  onSearchComplete:()=>void
+import { useState, useRef } from "react";
+import { useFlightStore } from "../stores/flightStores";
+import { searchFlights, searchAirport } from "../Api/FlightApi";
+import type { GoogleFlightAirport } from "../flight.types";
+interface props {
+  onSearchComplete: () => void;
 }
 // Simple cache to avoid duplicate API calls
 const cache: Record<string, GoogleFlightAirport[]> = {};
 
-export const SearchForm = (props:props) => {
+export const SearchForm = (props: props) => {
   const {
     departureDate,
     passengers,
@@ -17,14 +17,16 @@ export const SearchForm = (props:props) => {
     setFlights,
     setLoading,
     setError,
-    setPriceGraphData
+    setPriceGraphData,
   } = useFlightStore();
 
   const [origin, setOrigin] = useState<GoogleFlightAirport | null>(null);
-  const [destination, setDestination] = useState<GoogleFlightAirport | null>(null);
-  
-  const [originQuery, setOriginQuery] = useState('');
-  const [destQuery, setDestQuery] = useState('');
+  const [destination, setDestination] = useState<GoogleFlightAirport | null>(
+    null,
+  );
+
+  const [originQuery, setOriginQuery] = useState("");
+  const [destQuery, setDestQuery] = useState("");
   const [originResults, setOriginResults] = useState<GoogleFlightAirport[]>([]);
   const [destResults, setDestResults] = useState<GoogleFlightAirport[]>([]);
   const [showOriginDropdown, setShowOriginDropdown] = useState(false);
@@ -55,16 +57,16 @@ export const SearchForm = (props:props) => {
     try {
       const response = await searchAirport(query);
       const results = response.data || [];
-      
+
       // Cache results
       cache[cacheKey] = results;
-      
+
       setOriginResults(results);
       setShowOriginDropdown(true);
     } catch (error: any) {
-      console.error('Airport search error:', error);
+      console.error("Airport search error:", error);
       if (error.response?.status === 429) {
-        setError('Too many requests. Please wait a moment.');
+        setError("Too many requests. Please wait a moment.");
       }
     } finally {
       setSearchingOrigin(false);
@@ -91,16 +93,16 @@ export const SearchForm = (props:props) => {
     try {
       const response = await searchAirport(query);
       const results = response.data || [];
-      
+
       // Cache results
       cache[cacheKey] = results;
-      
+
       setDestResults(results);
       setShowDestDropdown(true);
     } catch (error: any) {
-      console.error('Airport search error:', error);
+      console.error("Airport search error:", error);
       if (error.response?.status === 429) {
-        setError('Too many requests. Please wait a moment.');
+        setError("Too many requests. Please wait a moment.");
       }
     } finally {
       setSearchingDest(false);
@@ -121,67 +123,70 @@ export const SearchForm = (props:props) => {
   };
 
   // Handle form submission
-const handleSearch = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  if (!origin || !destination || !departureDate) {
-    setError('Please fill in all required fields');
-    return;
-  }
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  setLoading(true);
-  setError(null);
-
-  try {
-    // Just fetch flights - priceHistory is included
-    const flightsResponse = await searchFlights({
-      departure_id: origin.id,
-      arrival_id: destination.id,
-      outbound_date: departureDate,
-      adults: passengers,
-      travel_class: 'ECONOMY',
-      currency: 'USD',
-      language_code: 'en-US',
-      country_code: 'US',
-    });
-
-    console.log('✅ Flight Search Response:', flightsResponse);
-    
-    const flights = flightsResponse.data?.itineraries?.topFlights || [];
-    const priceHistory = flightsResponse.data?.priceHistory?.history || [];
-    
-    console.log('📊 Price History:', priceHistory);
-    
-    setFlights(flights);
-    
-    // Transform price history to match our graph format
-    if (priceHistory.length > 0) {
-      const formattedPriceData = priceHistory.map((item: any) => ({
-        departure: item.date,
-        price: item.price
-      }));
-      setPriceGraphData(formattedPriceData);
+    if (!origin || !destination || !departureDate) {
+      setError("Please fill in all required fields");
+      return;
     }
-    
-    if (flights.length === 0) {
-      setError('No flights found for this route');
-    }
-  } catch (error: any) {
-    console.error('❌ Search error:', error);
-    setError('Failed to search flights. Please try again.');
-  } finally {
-    setLoading(false);
-  }
-};
 
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Just fetch flights - priceHistory is included
+      const flightsResponse = await searchFlights({
+        departure_id: origin.id,
+        arrival_id: destination.id,
+        outbound_date: departureDate,
+        adults: passengers,
+        travel_class: "ECONOMY",
+        currency: "USD",
+        language_code: "en-US",
+        country_code: "US",
+      });
+
+      console.log("✅ Flight Search Response:", flightsResponse);
+
+      const flights = flightsResponse.data?.itineraries?.topFlights || [];
+      const priceHistory = flightsResponse.data?.priceHistory?.history || [];
+
+      console.log("📊 Price History:", priceHistory);
+
+      setFlights(flights);
+
+      
+      // Transform price history to match our graph format
+      if (priceHistory.length > 0) {
+        const formattedPriceData = priceHistory.map((item: any) => {
+          const dateStr = new Date(item.time).toISOString().split("T")[0];
+          return {
+            date: dateStr,
+            price: item.value,
+          };
+        });
+        setPriceGraphData(formattedPriceData);
+      }
+
+      if (flights.length === 0) {
+        setError("No flights found for this route");
+      }
+    } catch (error: any) {
+      console.error("❌ Search error:", error);
+      setError("Failed to search flights. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-white md:w-3/4 shadow-lg rounded-lg p-4 md:p-6 mx-auto">
       <h1 className="text-2xl md:text-2xl font-bold mb-6 text-main-900 font-Rubik">
         Search Flights
       </h1>
-      
-      <form onSubmit={handleSearch} className="space-y-4 font-DMSans" >
+
+      <form onSubmit={handleSearch} className="space-y-4 font-DMSans">
         {/* Origin Input */}
         <div className="relative">
           <label className="block text-sm font-medium text-main-900 mb-2">
@@ -201,7 +206,7 @@ const handleSearch = async (e: React.FormEvent) => {
               </div>
             )}
           </div>
-          
+
           {/* Origin Dropdown */}
           {showOriginDropdown && originResults.length > 0 && (
             <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -215,8 +220,12 @@ const handleSearch = async (e: React.FormEvent) => {
                   }}
                   className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition"
                 >
-                  <div className="font-medium text-gray-900">{airport.title}</div>
-                  <div className="text-sm text-gray-500">{airport.subtitle}</div>
+                  <div className="font-medium text-gray-900">
+                    {airport.title}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {airport.subtitle}
+                  </div>
                 </div>
               ))}
             </div>
@@ -242,7 +251,7 @@ const handleSearch = async (e: React.FormEvent) => {
               </div>
             )}
           </div>
-          
+
           {/* Destination Dropdown */}
           {showDestDropdown && destResults.length > 0 && (
             <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -256,8 +265,12 @@ const handleSearch = async (e: React.FormEvent) => {
                   }}
                   className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition"
                 >
-                  <div className="font-medium text-gray-900">{airport.title}</div>
-                  <div className="text-sm text-gray-500">{airport.subtitle}</div>
+                  <div className="font-medium text-gray-900">
+                    {airport.title}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {airport.subtitle}
+                  </div>
                 </div>
               ))}
             </div>
@@ -274,7 +287,7 @@ const handleSearch = async (e: React.FormEvent) => {
               type="date"
               value={departureDate}
               onChange={(e) => setDepartureDate(e.target.value)}
-              min={new Date().toISOString().split('T')[0]}
+              min={new Date().toISOString().split("T")[0]}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
             />
           </div>
@@ -306,5 +319,3 @@ const handleSearch = async (e: React.FormEvent) => {
     </div>
   );
 };
-
-

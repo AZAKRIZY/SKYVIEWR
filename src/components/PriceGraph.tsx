@@ -27,15 +27,20 @@ export const PriceGraph = () => {
     return null;
   }
 
-  // Format data for Recharts
-const chartData = priceGraphData.map(point => ({
-  date: new Date(point.departure).toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: 'numeric' 
-  }),
-  price: Number(point.price) || 0, // Ensure it's a number
-  fullDate: point.departure
-}));
+ 
+
+// Format data for Recharts
+const chartData = priceGraphData.map(point => {
+  const dateStr = point.date || point.departure || ''; // Handle both
+  return {
+    date: new Date(dateStr).toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric' 
+    }),
+    price: Number(point.price) || 0,
+    fullDate: dateStr
+  };
+});
 
 // Find min and max prices for context
 const prices = priceGraphData.map(p => Number(p.price)).filter(p => !isNaN(p) && p > 0);
@@ -65,9 +70,9 @@ const avgPrice = prices.length > 0 ? Math.round(prices.reduce((a, b) => a + b, 0
         </div>
       </div>
 
-      <div className="w-[75%] " style={{ height: "300px" }}>
-        {/* Use inline style for height */}
-        <ResponsiveContainer width="75%" height={320}>
+      <div className="w-full " style={{ height: "300px" }}>
+        
+        <ResponsiveContainer width="100%" height={320}>
           <LineChart
             data={chartData}
             margin={{ top: 5, right: 20, left: 0, bottom: 5 }}

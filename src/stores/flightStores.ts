@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type{ Flight, FlightFilters, GoogleFlightAirport } from '../flight.types';
+import type{ Flight, FlightFilters, GoogleFlightAirport, PriceGraphPoint } from '../flight.types';
 
 interface FlightStore {
   // Search params
@@ -19,7 +19,7 @@ interface FlightStore {
   filters: FlightFilters;
   
   // Price graph data
-  priceGraphData: Array<{ departure: string; price: number }>;
+ priceGraphData: PriceGraphPoint[];
   
   // Actions
   setOrigin: (airport: GoogleFlightAirport | null) => void;
